@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>社区管理后台</title>
+    <!-- 引入Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- 引入Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css">
+    <style>
+        /* 自定义样式 */
+        body {
+            font-family: "Microsoft YaHei", sans-serif;
+            overflow-x: hidden;
+        }
+        .sidebar {
+            min-height: 100vh;
+            background-color: #212529;
+            width: 220px;
+            transition: all 0.3s;
+        }
+        .sidebar .nav-link {
+            color: #adb5bd;
+            padding: 10px 20px;
+            border-left: 3px solid transparent;
+        }
+        .sidebar .nav-link.active {
+            color: #fff;
+            background-color: #0d6efd;
+            border-left-color: #fff;
+        }
+        .sidebar .nav-link:hover {
+            color: #fff;
+            background-color: #343a40;
+        }
+        .content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            margin-bottom: 20px;
+        }
+        .table-responsive {
+            min-height: 0;
+        }
+        .badge-status {
+            cursor: default; /* 取消状态标签的点击指针 */
+        }
+    </style>
+</head>
+<body>
+    <div class="d-flex">
+        <!-- 侧边栏导航 -->
+        <div class="sidebar">
+            <div class="text-white p-3 fs-5 text-center border-bottom">社区管理后台</div>
+            <div class="nav flex-column mt-3">
+                <div class="nav-item">
+                    <a class="nav-link" data-target="community">
+                        <i class="fa fa-users me-2"></i>社区管理
+                    </a>
+                    <div class="ms-3 mt-1">
+                        <a class="nav-link sub-nav" data-target="point-manage">
+                            <i class="fa fa-credit-card me-2"></i>魔乐币管理
+                        </a>
+                        <a class="nav-link sub-nav" data-target="mall-manage">
+                            <i class="fa fa-shopping-cart me-2"></i>商城管理
+                        </a>
+                        <a class="nav-link sub-nav" data-target="security-manage">
+                            <i class="fa fa-shield me-2"></i>安全管理
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 主内容区 -->
+        <div class="content">
+            <!-- 页面标题 -->
+            <div class="mb-4">
+                <h2 id="page-title">社区管理</h2>
+            </div>
+
+            <!-- 魔乐币管理模块 -->
+            <div id="point-manage" class="module-content d-none">
+                <!-- 单日上限魔乐币额度配置 -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">单日上限魔乐币额度</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">用户单日获取魔乐币上限</label>
+                                <input type="number" class="form-control" id="daily-max-point" value="500" min="0">
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">用户单日消耗魔乐币上限</label>
+                                <input type="number" class="form-control" id="daily-max-consume" value="1000" min="0">
+                            </div>
+                            <div class="col-12 mt-3">
+                                <button class="btn btn-primary" id="save-daily-config">保存配置</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 魔乐币配置管理 -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">魔乐币配置管理</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs mb-3" id="point-config-tabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="model-tab" data-bs-toggle="tab" data-bs-target="#model" type="button" role="tab">模型</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="dataset-tab" data-bs-toggle="tab" data-bs-target="#dataset" type="button" role="tab">数据集</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="space-tab" data-bs-toggle="tab" data-bs-target="#space" type="button" role="tab">体验空间</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="blog-tab" data-bs-toggle="tab" data-bs-target="#blog" type="button" role="tab">博客</button>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="point-config-tab-content">
+                            <!-- 模型魔乐币配置 -->
+                            <div class="tab-pane fade show active" id="model" role="tabpanel">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">模型首发创建魔乐币</label>
+                                        <input type="number" class="form-control" id="model-first-point" value="15" min="0">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">模型公开创建魔乐币</label>
+                                        <input type="number" class="form-control" id="model-public-point" value="8" min="0">
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <button class="btn btn-primary" id="save-model-config">保存配置</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 数据集魔乐币配置 -->
+                            <div class="tab-pane fade" id="dataset" role="tabpanel">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">数据集首发创建魔乐币</label>
+                                        <input type="number" class="form-control" id="dataset-first-point" value="25" min="0">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">数据集公开创建魔乐币</label>
+                                        <input type="number" class="form-control" id="dataset-public-point" value="12" min="0">
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <button class="btn btn-primary" id="save-dataset-config">保存配置</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 体验空间魔乐币配置 -->
+                            <div class="tab-pane fade" id="space" role="tabpanel">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">体验空间首发创建魔乐币</label>
+                                        <input type="number" class="form-control" id="space-first-point" value="30" min="0">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">体验空间公开创建魔乐币</label>
+                                        <input type="number" class="form-control" id="space-public-point" value="10" min="0">
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <button class="btn btn-primary" id="save-space-config">保存配置</button>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- 博客魔乐币配置 -->
+                            <div class="tab-pane fade" id="blog" role="tabpanel">
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label class="form-label">博客首发创建魔乐币</label>
+                                        <input type="number" class="form-control" id="blog-first-point" value="20" min="0">
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label class="form-label">博客公开创建魔乐币</label>
+                                        <input type="number" class="form-control" id="blog-public-point" value="5" min="0">
+                                    </div>
+                                    <div class="col-12 mt-3">
+                                        <button class="btn btn-primary" id="save-blog-config">保存配置</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 魔乐币明细表 -->
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">魔乐币明细表</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>用户名</th>
+                                        <th>用户魔乐币</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="point-table-body">
+                                    <!-- 模拟数据 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商城管理模块 -->
+            <div id="mall-manage" class="module-content d-none">
+                <!-- 商城明细表 -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">商城明细表</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>商品名称</th>
+                                        <th>商品状态</th>
+                                        <th>商品价格（魔乐币）</th>
+                                        <th>库存</th>
+                                        <th>单人购买上限</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mall-table-body">
+                                    <!-- 模拟数据 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 安全管理模块 -->
+            <div id="security-manage" class="module-content d-none">
+                <!-- 黑名单库 -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">黑名单库</h5>
+                        <button class="btn btn-sm btn-danger" id="add-blacklist-btn">
+                            <i class="fa fa-plus me-1"></i>添加黑名单
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-hover table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>用户名</th>
+                                        <th>加入时间</th>
+                                        <th>拉黑原因</th>
+                                        <th>操作</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="blacklist-table-body">
+                                    <!-- 模拟数据 -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 默认显示的社区管理页面 -->
+            <div id="community" class="module-content">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <h4>欢迎使用社区管理后台</h4>
+                        <p class="text-muted mt-2">请从左侧菜单选择需要管理的模块</p>
+                        <img src="https://picsum.photos/600/300" alt="社区管理" class="img-fluid rounded mt-3" style="max-width: 80%;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改魔乐币模态框 -->
+    <div class="modal fade" id="editPointModal" tabindex="-1" aria-labelledby="editPointModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPointModalLabel">修改用户魔乐币</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-username">
+                    <div class="mb-3">
+                        <label class="form-label">用户名</label>
+                        <input type="text" class="form-control" id="show-username" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">新魔乐币值</label>
+                        <input type="number" class="form-control" id="new-point" min="0" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="save-point-btn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 修改商品信息模态框 -->
+    <div class="modal fade" id="editMallModal" tabindex="-1" aria-labelledby="editMallModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editMallModalLabel">修改商品信息</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="edit-goods-id">
+                    <div class="mb-3">
+                        <label class="form-label">商品名称</label>
+                        <input type="text" class="form-control" id="show-goods-name" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">商品价格（魔乐币）</label>
+                        <input type="number" class="form-control" id="new-price" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">库存</label>
+                        <input type="number" class="form-control" id="new-stock" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">单人购买上限</label>
+                        <input type="number" class="form-control" id="new-limit" min="1" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="save-mall-btn">保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 添加黑名单模态框 -->
+    <div class="modal fade" id="addBlacklistModal" tabindex="-1" aria-labelledby="addBlacklistModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addBlacklistModalLabel">添加黑名单</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">用户名</label>
+                        <input type="text" class="form-control" id="blacklist-username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">拉黑原因</label>
+                        <textarea class="form-control" id="blacklist-reason" rows="3" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-danger" id="save-blacklist-btn">确认添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 引入Bootstrap 5 JS和Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+    <script>
+        // 模拟数据
+        // 魔乐币明细数据
+        const pointData = [
+            { username: "user001", point: 120 },
+            { username: "user002", point: 85 },
+            { username: "user003", point: 200 },
+            { username: "user004", point: 50 },
+            { username: "user005", point: 156 }
+        ];
+
+        // 商城商品数据
+        const mallData = [
+            { id: 1, name: "魔乐币兑换优惠券", status: 1, price: 50, stock: 100, limit: 5 },
+            { id: 2, name: "AI模型使用时长", status: 1, price: 100, stock: 50, limit: 3 },
+            { id: 3, name: "会员体验卡", status: 0, price: 200, stock: 20, limit: 1 },
+            { id: 4, name: "数据集下载权限", status: 1, price: 80, stock: 80, limit: 2 },
+            { id: 5, name: "周边礼品", status: 0, price: 300, stock: 10, limit: 1 }
+        ];
+
+        // 黑名单数据
+        const blacklistData = [
+            { username: "user999", time: "2026-01-10 14:30:00", reason: "恶意刷取魔乐币" },
+            { username: "user888", time: "2026-01-15 09:15:00", reason: "发布违规内容" },
+            { username: "user777", time: "2026-01-20 16:45:00", reason: "恶意攻击平台" }
+        ];
+
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 渲染魔乐币明细表
+            renderPointTable();
+            // 渲染商城明细表
+            renderMallTable();
+            // 渲染黑名单表
+            renderBlacklistTable();
+
+            // 侧边栏导航切换
+            const navLinks = document.querySelectorAll('.nav-link[data-target]');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    // 移除所有激活状态
+                    navLinks.forEach(l => l.classList.remove('active'));
+                    // 添加当前激活状态
+                    this.classList.add('active');
+                    // 隐藏所有模块
+                    document.querySelectorAll('.module-content').forEach(module => {
+                        module.classList.add('d-none');
+                    });
+                    // 显示目标模块
+                    const target = this.getAttribute('data-target');
+                    document.getElementById(target).classList.remove('d-none');
+                    // 更新页面标题
+                    document.getElementById('page-title').textContent = this.textContent.trim();
+                });
+            });
+
+            // 子导航点击事件（解决嵌套导航激活问题）
+            const subNavLinks = document.querySelectorAll('.sub-nav');
+            subNavLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.stopPropagation(); // 阻止事件冒泡
+                });
+            });
+
+            // 修改魔乐币按钮点击事件（事件委托）
+            document.getElementById('point-table-body').addEventListener('click', function(e) {
+                if (e.target.classList.contains('edit-point-btn')) {
+                    const username = e.target.getAttribute('data-username');
+                    const currentPoint = e.target.getAttribute('data-point');
+                    // 填充模态框数据
+                    document.getElementById('edit-username').value = username;
+                    document.getElementById('show-username').value = username;
+                    document.getElementById('new-point').value = currentPoint;
+                    // 显示模态框
+                    const modal = new bootstrap.Modal(document.getElementById('editPointModal'));
+                    modal.show();
+                }
+            });
+
+            // 保存魔乐币修改
+            document.getElementById('save-point-btn').addEventListener('click', function() {
+                const username = document.getElementById('edit-username').value;
+                const newPoint = document.getElementById('new-point').value;
+                if (!newPoint || newPoint < 0) {
+                    alert('请输入有效的魔乐币值（≥0）');
+                    return;
+                }
+                // 更新模拟数据
+                const index = pointData.findIndex(item => item.username === username);
+                if (index !== -1) {
+                    pointData[index].point = newPoint;
+                    // 重新渲染表格
+                    renderPointTable();
+                    // 关闭模态框
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editPointModal'));
+                    modal.hide();
+                    alert('魔乐币修改成功！');
+                }
+            });
+
+            // 商城操作事件委托
+            document.getElementById('mall-table-body').addEventListener('click', function(e) {
+                // 上架按钮
+                if (e.target.classList.contains('up-btn')) {
+                    const goodsId = parseInt(e.target.getAttribute('data-id'));
+                    const index = mallData.findIndex(item => item.id === goodsId);
+                    if (index !== -1) {
+                        if (mallData[index].status === 1) {
+                            alert('该商品已处于上架状态！');
+                            return;
+                        }
+                        // 切换为上架状态（1=上架）
+                        mallData[index].status = 1;
+                        renderMallTable();
+                        alert('商品上架成功！');
+                    }
+                }
+
+                // 下架按钮
+                if (e.target.classList.contains('down-btn')) {
+                    const goodsId = parseInt(e.target.getAttribute('data-id'));
+                    const index = mallData.findIndex(item => item.id === goodsId);
+                    if (index !== -1) {
+                        if (mallData[index].status === 0) {
+                            alert('该商品已处于下架状态！');
+                            return;
+                        }
+                        // 切换为下架状态（0=下架）
+                        mallData[index].status = 0;
+                        renderMallTable();
+                        alert('商品下架成功！');
+                    }
+                }
+
+                // 修改商品信息按钮
+                if (e.target.classList.contains('edit-mall-btn')) {
+                    const goodsId = parseInt(e.target.getAttribute('data-id'));
+                    const goods = mallData.find(item => item.id === goodsId);
+                    if (goods) {
+                        // 填充模态框数据
+                        document.getElementById('edit-goods-id').value = goodsId;
+                        document.getElementById('show-goods-name').value = goods.name;
+                        document.getElementById('new-price').value = goods.price;
+                        document.getElementById('new-stock').value = goods.stock;
+                        document.getElementById('new-limit').value = goods.limit;
+                        // 显示模态框
+                        const modal = new bootstrap.Modal(document.getElementById('editMallModal'));
+                        modal.show();
+                    }
+                }
+            });
+
+            // 保存商品信息修改
+            document.getElementById('save-mall-btn').addEventListener('click', function() {
+                const goodsId = parseInt(document.getElementById('edit-goods-id').value);
+                const newPrice = document.getElementById('new-price').value;
+                const newStock = document.getElementById('new-stock').value;
+                const newLimit = document.getElementById('new-limit').value;
+                
+                if (!newPrice || newPrice < 0) {
+                    alert('请输入有效的商品价格（≥0）');
+                    return;
+                }
+                if (!newStock || newStock < 0) {
+                    alert('请输入有效的库存值（≥0）');
+                    return;
+                }
+                if (!newLimit || newLimit < 1) {
+                    alert('请输入有效的购买上限（≥1）');
+                    return;
+                }
+
+                // 更新模拟数据
+                const index = mallData.findIndex(item => item.id === goodsId);
+                if (index !== -1) {
+                    mallData[index].price = newPrice;
+                    mallData[index].stock = newStock;
+                    mallData[index].limit = newLimit;
+                    // 重新渲染表格
+                    renderMallTable();
+                    // 关闭模态框
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editMallModal'));
+                    modal.hide();
+                    alert('商品信息修改成功！');
+                }
+            });
+
+            // 魔乐币配置保存按钮事件
+            const configSaveBtns = [
+                { id: 'save-daily-config', msg: '单日魔乐币上限配置' },
+                { id: 'save-model-config', msg: '模型魔乐币配置' },
+                { id: 'save-dataset-config', msg: '数据集魔乐币配置' },
+                { id: 'save-space-config', msg: '体验空间魔乐币配置' },
+                { id: 'save-blog-config', msg: '博客魔乐币配置' }
+            ];
+            configSaveBtns.forEach(item => {
+                document.getElementById(item.id).addEventListener('click', function() {
+                    alert(`${item.msg}保存成功！`);
+                });
+            });
+
+            // 打开添加黑名单模态框
+            document.getElementById('add-blacklist-btn').addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('addBlacklistModal'));
+                modal.show();
+            });
+
+            // 保存黑名单添加
+            document.getElementById('save-blacklist-btn').addEventListener('click', function() {
+                const username = document.getElementById('blacklist-username').value.trim();
+                const reason = document.getElementById('blacklist-reason').value.trim();
+                
+                if (!username) {
+                    alert('请输入用户名！');
+                    return;
+                }
+                if (!reason) {
+                    alert('请输入拉黑原因！');
+                    return;
+                }
+
+                // 检查是否已存在
+                const exists = blacklistData.some(item => item.username === username);
+                if (exists) {
+                    alert('该用户已在黑名单中！');
+                    return;
+                }
+
+                // 获取当前时间
+                const now = new Date();
+                const timeStr = now.getFullYear() + "-" + 
+                                String(now.getMonth() + 1).padStart(2, '0') + "-" + 
+                                String(now.getDate()).padStart(2, '0') + " " + 
+                                String(now.getHours()).padStart(2, '0') + ":" + 
+                                String(now.getMinutes()).padStart(2, '0') + ":" + 
+                                String(now.getSeconds()).padStart(2, '0');
+
+                // 添加到模拟数据
+                blacklistData.push({
+                    username: username,
+                    time: timeStr,
+                    reason: reason
+                });
+
+                // 重新渲染表格
+                renderBlacklistTable();
+
+                // 关闭模态框并清空输入
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addBlacklistModal'));
+                modal.hide();
+                document.getElementById('blacklist-username').value = '';
+                document.getElementById('blacklist-reason').value = '';
+                
+                alert('添加黑名单成功！');
+            });
+
+            // 移除黑名单事件委托
+            document.getElementById('blacklist-table-body').addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove-blacklist-btn')) {
+                    const username = e.target.getAttribute('data-username');
+                    if (confirm(`确定要将 ${username} 移出黑名单吗？`)) {
+                        // 移除数据
+                        const index = blacklistData.findIndex(item => item.username === username);
+                        if (index !== -1) {
+                            blacklistData.splice(index, 1);
+                            renderBlacklistTable();
+                            alert('移出黑名单成功！');
+                        }
+                    }
+                }
+            });
+        });
+
+        // 渲染魔乐币明细表
+        function renderPointTable() {
+            const tbody = document.getElementById('point-table-body');
+            tbody.innerHTML = '';
+            pointData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.username}</td>
+                    <td>${item.point}</td>
+                    <td>
+                        <button class="btn btn-sm btn-primary edit-point-btn" 
+                                data-username="${item.username}" 
+                                data-point="${item.point}">
+                            <i class="fa fa-edit me-1"></i>修改
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 渲染商城明细表
+        function renderMallTable() {
+            const tbody = document.getElementById('mall-table-body');
+            tbody.innerHTML = '';
+            mallData.forEach(item => {
+                const statusBadge = item.status === 1 
+                    ? `<span class="badge bg-success badge-status">已上架</span>`
+                    : `<span class="badge bg-danger badge-status">已下架</span>`;
+                
+                // 根据商品状态控制上架/下架按钮的显示
+                const upBtn = item.status === 0 
+                    ? `<button class="btn btn-sm btn-success up-btn me-1" data-id="${item.id}">
+                          <i class="fa fa-arrow-up me-1"></i>上架
+                       </button>` 
+                    : '';
+                
+                const downBtn = item.status === 1 
+                    ? `<button class="btn btn-sm btn-danger down-btn me-1" data-id="${item.id}">
+                          <i class="fa fa-arrow-down me-1"></i>下架
+                       </button>` 
+                    : '';
+                
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.name}</td>
+                    <td>${statusBadge}</td>
+                    <td>${item.price}</td>
+                    <td>${item.stock}</td>
+                    <td>${item.limit}</td>
+                    <td>
+                        ${upBtn}
+                        ${downBtn}
+                        <button class="btn btn-sm btn-warning edit-mall-btn" data-id="${item.id}">
+                            <i class="fa fa-pencil me-1"></i>编辑
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 渲染黑名单表
+        function renderBlacklistTable() {
+            const tbody = document.getElementById('blacklist-table-body');
+            tbody.innerHTML = '';
+            
+            if (blacklistData.length === 0) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td colspan="4" class="text-center text-muted">暂无黑名单数据</td>
+                `;
+                tbody.appendChild(tr);
+                return;
+            }
+
+            blacklistData.forEach(item => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${item.username}</td>
+                    <td>${item.time}</td>
+                    <td>${item.reason}</td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-danger remove-blacklist-btn" 
+                                data-username="${item.username}">
+                            <i class="fa fa-trash me-1"></i>移出
+                        </button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+    </script>
+</body>
+</html>
