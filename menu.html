@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>社区管理系统 - 菜单栏</title>
+  <!-- 引入Vue3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <!-- 引入Element-Plus CSS CDN -->
+  <link rel="stylesheet" href="https://unpkg.com/element-plus/dist/index.css">
+  <!-- 引入Element-Plus JS CDN -->
+  <script src="https://unpkg.com/element-plus/dist/index.full.js"></script>
+  <!-- 引入Element-Plus图标CDN -->
+  <script src="https://unpkg.com/@element-plus/icons-vue/dist/index.iife.js"></script>
+  <style>
+    /* 全局样式重置 */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    html, body, #app {
+      height: 100%;
+      width: 100%;
+      overflow: hidden;
+      font-family: "Microsoft Yahei", sans-serif;
+    }
+    /* 整体布局样式 */
+    .admin-layout {
+      display: flex;
+      height: 100%;
+      width: 100%;
+      background-color: #f5f7fa;
+    }
+    /* 侧边栏样式优化 */
+    .aside-container {
+      width: 220px !important;
+      background-color: #1f2d3d;
+      color: #fff;
+      transition: all 0.3s ease;
+    }
+    .menu-container {
+      height: 100%;
+      border-right: none;
+      background-color: #1f2d3d;
+      --el-menu-text-color: #c0c4cc;
+      --el-menu-active-text-color: #ffffff;
+      --el-menu-hover-text-color: #ffffff;
+      --el-menu-bg-color: #1f2d3d;
+      --el-menu-active-bg-color: #0066cc;
+      --el-menu-hover-bg-color: #2c3e50;
+    }
+    /* 菜单层级间距优化 */
+    .el-sub-menu .el-menu-item {
+      padding-left: 40px !important; /* 二级菜单缩进 */
+    }
+    .el-sub-menu .el-sub-menu .el-menu-item {
+      padding-left: 60px !important; /* 三级菜单缩进（无图标） */
+    }
+    /* 图标样式优化 */
+    .el-menu-item .el-icon, .el-sub-menu__title .el-icon {
+      margin-right: 8px;
+      font-size: 16px;
+    }
+    /* 三级菜单隐藏图标占位 */
+    .third-level-menu .el-icon {
+      display: none !important;
+    }
+    /* 主内容区域样式优化 */
+    .main-container {
+      flex: 1;
+      padding: 24px;
+      background-color: #fff;
+      overflow-y: auto;
+      box-shadow: -1px 0 10px rgba(0,0,0,0.05);
+    }
+    .menu-content {
+      font-size: 16px;
+      color: #303133;
+      line-height: 40px;
+      padding: 24px;
+      border: 1px solid #e5e6eb;
+      border-radius: 6px;
+      background-color: #fafafa;
+    }
+    /* 人工审核Tab区域样式优化 */
+    .audit-tab-container {
+      width: 100%;
+    }
+    .el-tabs--card {
+      --el-tabs-card-border-color: #e5e6eb;
+      --el-tabs-card-header-bg-color: #fafafa;
+    }
+    .el-tabs__item {
+      font-size: 14px;
+      padding: 0 20px;
+    }
+    .tab-content {
+      padding: 24px;
+      margin-top: 12px;
+      border: 1px solid #e5e6eb;
+      border-radius: 6px;
+      background-color: #fafafa;
+      color: #303133;
+      line-height: 1.6;
+    }
+    /* 菜单折叠/展开过渡 */
+    .el-menu {
+      transition: all 0.2s ease;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="admin-layout">
+      <!-- 侧边菜单栏 -->
+      <el-aside class="aside-container">
+        <el-menu
+          :default-active="activeMenu"
+          :default-openeds="['1','2','3']"
+          class="menu-container"
+          @select="handleMenuSelect"
+          text-color="#c0c4cc"
+          active-text-color="#fff"
+        >
+          <!-- 一级菜单：社区数据看板（补充图标） -->
+          <el-sub-menu index="1">
+            <template #title>
+                <el-icon><Setting /></el-icon>
+              <span>社区数据看板</span>
+            </template>
+            <!-- 二级菜单：数据埋点（带图标） -->
+            <el-menu-item index="1-1">
+                <el-icon><Coin /></el-icon>
+              <span>数据埋点</span>
+            </el-menu-item>
+          </el-sub-menu>
+
+          <!-- 一级菜单：网站配置管理（带图标） -->
+          <el-sub-menu index="2">
+            <template #title>
+              <el-icon><Setting /></el-icon>
+              <span>网站配置管理</span>
+            </template>
+            <!-- 二级菜单：专区管理（带图标） -->
+            <el-sub-menu index="2-1">
+              <template #title>
+                <el-icon><Grid /></el-icon>
+                <span>专区管理</span>
+              </template>
+              <!-- 三级菜单：新建专区（无图标） -->
+              <el-menu-item index="2-1-1" class="third-level-menu">
+                <el-icon><Plus /></el-icon>
+                <span>新建专区</span>
+              </el-menu-item>
+              <!-- 三级菜单：专区列表（无图标） -->
+              <el-menu-item index="2-1-2" class="third-level-menu">
+                <el-icon><List /></el-icon>
+                <span>专区列表</span>
+              </el-menu-item>
+            </el-sub-menu>
+            <!-- 二级菜单：动态管理（带图标） -->
+            <el-menu-item index="2-2">
+              <el-icon><Message /></el-icon>
+              <span>动态管理</span>
+            </el-menu-item>
+            <!-- 二级菜单：活动管理（带图标） -->
+            <el-menu-item index="2-3">
+              <el-icon><Calendar /></el-icon>
+              <span>活动管理</span>
+            </el-menu-item>
+            <!-- 二级菜单：魔乐币管理（带图标） -->
+            <el-menu-item index="2-4">
+              <el-icon><Coin /></el-icon>
+              <span>魔乐币管理</span>
+            </el-menu-item>
+            <!-- 二级菜单：商城管理（带图标） -->
+            <el-menu-item index="2-5">
+              <el-icon><Shop /></el-icon>
+              <span>商城管理</span>
+            </el-menu-item>
+          </el-sub-menu>
+
+          <!-- 一级菜单：社区安全防护（补充图标） -->
+          <el-sub-menu index="3">
+            <template #title>
+                <el-icon><Setting /></el-icon>
+              <span>社区安全防护</span>
+            </template>
+            <!-- 二级菜单：人工审核（补充图标） -->
+            <el-menu-item index="3-1">
+                <el-icon><Coin /></el-icon>
+              <span>人工审核</span>
+            </el-menu-item>
+            <!-- 二级菜单：博客管理（带图标） -->
+            <el-menu-item index="3-2">
+              <el-icon><Document /></el-icon>
+              <span>博客管理</span>
+            </el-menu-item>
+            <!-- 二级菜单：版本管理（补充图标） -->
+            <el-menu-item index="3-3">
+                <el-icon><Coin /></el-icon>
+              <span>版本管理</span>
+            </el-menu-item>
+            <!-- 二级菜单：模型管理（带图标） -->
+            <el-menu-item index="3-4">
+              <el-icon><Lollipop /></el-icon>
+              <span>模型管理</span>
+            </el-menu-item>
+            <!-- 二级菜单：安全管理（带图标） -->
+            <el-sub-menu index="3-5">
+              <template #title>
+                <el-icon><Lock /></el-icon>
+                <span>安全管理</span>
+              </template>
+              <!-- 三级菜单：黑名单库（无图标） -->
+              <el-menu-item index="3-5-1" class="third-level-menu">
+                <el-icon><UserDelete /></el-icon>
+                <span>黑名单库</span>
+              </el-menu-item>
+            </el-sub-menu>
+          </el-sub-menu>
+        </el-menu>
+      </el-aside>
+
+      <!-- 主内容区域 -->
+      <el-main class="main-container">
+        <!-- 人工审核的Tab切换区域（选中人工审核时显示） -->
+        <div v-if="activeMenu === '3-1'" class="audit-tab-container">
+          <el-tabs v-model="activeTab" type="card" size="default">
+            <el-tab-pane label="体验空间" name="tab1">
+              <div class="tab-content">体验空间管理内容：可查看/审核用户创建的体验空间，支持状态修改、删除、详情查看等操作。</div>
+            </el-tab-pane>
+            <el-tab-pane label="模型" name="tab2">
+              <div class="tab-content">模型审核内容：审核用户提交的AI模型，包括模型名称、描述、版本、权限等信息校验。</div>
+            </el-tab-pane>
+            <el-tab-pane label="数据集" name="tab3">
+              <div class="tab-content">数据集审核内容：核验数据集的合规性、完整性，支持批量审核、驳回并填写驳回原因。</div>
+            </el-tab-pane>
+            <el-tab-pane label="工具" name="tab4">
+              <div class="tab-content">工具审核内容：审核第三方工具接入申请，验证工具功能、安全性、兼容性等指标。</div>
+            </el-tab-pane>
+          </el-tabs>
+        </div>
+
+        <!-- 其他菜单的内容展示 -->
+        <div v-else class="menu-content">
+          当前功能区：{{ activeMenuName }}
+        </div>
+      </el-main>
+    </div>
+  </div>
+
+  <script>
+    // 初始化Vue实例
+    const { createApp } = Vue
+    const app = createApp({
+      data() {
+        return {
+          // 当前选中的菜单
+          activeMenu: '1-1',
+          // 当前激活的Tab
+          activeTab: 'tab1',
+          // 菜单名称映射
+          menuNameMap: {
+            '1-1': '数据埋点',
+            '2-1-1': '新建专区',
+            '2-1-2': '专区列表',
+            '2-2': '动态管理',
+            '2-3': '活动管理',
+            '2-4': '魔乐币管理',
+            '2-5': '商城管理',
+            '3-1': '人工审核',
+            '3-2': '博客管理',
+            '3-3': '版本管理',
+            '3-4': '模型管理',
+            '3-5-1': '黑名单库'
+          }
+        }
+      },
+      computed: {
+        // 计算当前选中菜单的名称
+        activeMenuName() {
+          return this.menuNameMap[this.activeMenu] || '请选择菜单'
+        }
+      },
+      methods: {
+        // 菜单选中事件处理
+        handleMenuSelect(index) {
+          this.activeMenu = index
+          // 选中人工审核时，默认激活第一个Tab
+          if (index === '3-1') {
+            this.activeTab = 'tab1'
+          }
+        }
+      }
+    })
+
+    // 全局注册Element-Plus和所有图标
+    app.use(ElementPlus)
+    for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+      app.component(key, component)
+    }
+
+    // 挂载Vue实例
+    app.mount('#app')
+  </script>
+</body>
+</html>
